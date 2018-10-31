@@ -1,0 +1,313 @@
+{ "title": "nothing to modify" }
+---
+const foo = 5;
+---
+const foo = 5;
+======
+{ "title": "simple import" }
+---
+import { foo } from "bar";
+---
+const { foo } = require("bar");
+======
+{ "title": "is okay without semicolons" }
+---
+import { foo } from "bar"
+
+import * as bar from "bar"
+
+export { foo as bar, baz } from "aha";
+---
+const { foo } = require("bar");
+const bar = require("bar");
+
+const {
+  foo: __foo__,
+  baz: __baz__,
+} = require("aha");
+module.exports = {
+  bar: __foo__,
+  baz: __baz__,
+}
+======
+{"title": "import with rename" }
+---
+import { a, b as c, d } from "bar";
+---
+const { a, b: c, d } = require("bar");
+======
+{"title": "await import" }
+---
+const foo = await import("bar");
+---
+const foo = require("bar");
+======
+{"title": "import *" }
+---
+import * as path from "path";
+---
+const path = require("path");
+======
+{"title": "await import with module name as variable" }
+---
+const foo = await import(bar);
+---
+const foo = require(bar);
+======
+{"title": "export a const" }
+---
+export const foo = 5;
+---
+const foo = 5;
+module.exports = {
+  foo,
+}
+======
+{"title": "export a function" }
+---
+export function foo(blah) {}
+---
+function foo(blah) {}
+module.exports = {
+  foo,
+}
+======
+{"title": "export a class" }
+---
+export class foo {};
+---
+class foo {};
+module.exports = {
+  foo,
+}
+======
+{"title": "re-export simple" }
+---
+export { foo } from "bar";
+---
+module.exports = {
+  foo: require("bar").foo,
+}
+======
+{"title": "re-export with rename" }
+---
+export { foo as bar } from "baz";
+---
+module.exports = {
+  bar: require("baz").foo,
+}
+======
+{"title": "multiple re-exports" }
+---
+export { foo, bar } from "baz";
+---
+const {
+  foo: __foo__,
+  bar: __bar__,
+} = require("baz");
+module.exports = {
+  foo: __foo__,
+  bar: __bar__,
+}
+======
+{"title": "multiple re-exports with rename" }
+---
+export { foo as wow, bar } from "lorem";
+---
+const {
+  foo: __foo__,
+  bar: __bar__,
+} = require("lorem");
+module.exports = {
+  wow: __foo__,
+  bar: __bar__,
+}
+======
+{"title": "multiple re-exports from module with name having non-alphanum characters", "maxModuleNameLength": 40 }
+---
+export { foo, bar } from "./module/aha/w-o-w/d.json";
+---
+const {
+  foo: __foo__,
+  bar: __bar__,
+} = require("./module/aha/w-o-w/d.json");
+module.exports = {
+  foo: __foo__,
+  bar: __bar__,
+}
+======
+{"title": "import in multiple lines" }
+---
+import {
+  a,
+  b as c,
+  d,
+} from "bar";
+---
+const {
+  a,
+  b: c,
+  d,
+} = require("bar");
+======
+{"title": "multiple imports" }
+---
+import { a, b as c, d } from "foo";
+import { e, f, g } from "bar";
+---
+const { a, b: c, d } = require("foo");
+const { e, f, g } = require("bar");
+======
+{"title": "multiple exports" }
+---
+export const foo = 5;
+export function bar(some, ...args) {
+
+}
+---
+const foo = 5;
+function bar(some, ...args) {
+
+}
+module.exports = {
+  foo,
+  bar,
+}
+======
+{"title": "allows setting options", "indent": 4 }
+---
+export { foo, bar } from "module";
+---
+const {
+    foo: __foo__,
+    bar: __bar__,
+} = require("module");
+module.exports = {
+    foo: __foo__,
+    bar: __bar__,
+}
+======
+{"title": "whitespace processing" }
+---
+export const foo = 5;
+
+
+
+
+
+
+export const bar = 6;
+
+
+
+---
+const foo = 5;
+
+const bar = 6;
+
+module.exports = {
+  foo,
+  bar,
+}
+======
+{"title": "disable whitespace processing", "removeMultipleNewLines": false }
+---
+export const foo = 5;
+
+
+
+
+
+
+export const bar = 6;
+
+
+
+---
+const foo = 5;
+
+
+
+
+
+
+const bar = 6;
+
+
+
+module.exports = {
+  foo,
+  bar,
+}
+======
+{"title": "all supported types mixed" }
+---
+import { a, b as c, d } from "m1";
+import {
+  e,
+  f as g,
+  h
+} from "m1/2";
+import * as path from "path";
+
+const i = await import("m2");
+
+export const j = 5;
+
+export { k } from "m3";
+
+export class l {
+  constructor(name) {
+    this.name = name;
+  }
+};
+
+export function m() {
+
+}
+
+export { n, o as p } from "m4";
+
+export { q };
+
+export { s as r };
+
+
+---
+const { a, b: c, d } = require("m1");
+const {
+  e,
+  f: g,
+  h
+} = require("m1/2");
+const path = require("path");
+
+const i = require("m2");
+
+const j = 5;
+
+class l {
+  constructor(name) {
+    this.name = name;
+  }
+};
+
+function m() {
+
+}
+
+const {
+  n: __n__,
+  o: __o__,
+} = require("m4");
+module.exports = {
+  j,
+  k: require("m3").k,
+  l,
+  m,
+  n: __n__,
+  p: __o__,
+  q,
+  s: r,
+}
+======

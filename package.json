@@ -1,0 +1,23 @@
+{
+  "name": "esm2cjs",
+  "version": "1.0.0",
+  "description": "Transform ESM to Common JS for NodeJS",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "nyc node test/test.js"
+  },
+  "keywords": [
+    "esm",
+    "commonjs",
+    "module"
+  ],
+  "author": "Sid Vishnoi <sidvishnoi8@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "easy-table": "^1.1.1",
+    "nyc": "^13.1.0"
+  }
+}
