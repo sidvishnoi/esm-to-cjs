@@ -1,0 +1,17 @@
+language: node_js
+dist: trusty
+node_js:
+  - lts/*
+
+install:
+  - npm install
+
+cache:
+  directories:
+    - node_modules # NPM packages
+
+jobs:
+  include:
+    - stage: Run Unit Tests
+      script:
+        - npm test
