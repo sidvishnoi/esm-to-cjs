@@ -10,7 +10,7 @@ const defaultOptions = {
   lenDestructure: 60,
   lenModuleName: 20,
   lenIdentifier: 20,
-  indent: 2,
+  indent: 2
 };
 
 function runTransform(str, options = {}) {
@@ -57,9 +57,8 @@ function transform(token, str, exportBuffer, { indent }) {
   const { type } = token;
   switch (type) {
     case "import": {
-      const identifiers = token.imports.map(s => s.join(": ")).join(", ");
-      const moduleName = token.from;
-      return `const { ${identifiers} } = require(${moduleName})`;
+      const identifiers = token.modules.map(s => s.join(": ")).join(", ");
+      return `const { ${identifiers} } = require(${token.moduleName})`;
     }
     case "import*": {
       const { identifier, moduleName } = token;
@@ -73,10 +72,10 @@ function transform(token, str, exportBuffer, { indent }) {
       return "";
     }
     case "reExport": {
-      const moduleName = token.from;
+      const { moduleName } = token;
 
-      if (token.exports.length === 1) {
-        const [original, alias] = token.exports[0];
+      if (token.modules.length === 1) {
+        const [original, alias] = token.modules[0];
         exportBuffer.items.push([
           alias ? alias : original,
           `require(${moduleName}).${original}`
@@ -85,20 +84,20 @@ function transform(token, str, exportBuffer, { indent }) {
       }
 
       exportBuffer.requires.push("const {\n");
-      const names = token.exports
+      const names = token.modules
         .map(([original]) => `${indent}${original}: __${original}__`)
         .join(",\n");
       exportBuffer.requires.push(names);
       exportBuffer.requires.push(`\n} = require(${moduleName});`);
 
-      for (const [original, alias] of token.exports) {
+      for (const [original, alias] of token.modules) {
         exportBuffer.items.push([alias ? alias : original, `__${original}__`]);
       }
 
       return "";
     }
     case "reExportImported": {
-      exportBuffer.items.push(...token.exports);
+      exportBuffer.items.push(...token.modules);
       return "";
     }
     default:
@@ -170,9 +169,8 @@ function* tokenize(str, options) {
       type: "import",
       start: pos,
       end: moduleEnd,
-      // match: str.slice(pos, moduleEnd + 1),
-      imports: destructureModules(str.slice(braceStart, braceEnd + 1)),
-      from: str.slice(moduleStart, moduleEnd + 1)
+      modules: destructureModules(str.slice(braceStart, braceEnd + 1)),
+      moduleName: str.slice(moduleStart, moduleEnd + 1)
     };
   }
 
@@ -189,7 +187,6 @@ function* tokenize(str, options) {
       start: pos,
       end: moduleEnd + 1,
       moduleName: str.slice(moduleStart, moduleEnd + 1)
-      // match: str.slice(pos, end + 1)
     };
   }
 
@@ -231,8 +228,6 @@ function* tokenize(str, options) {
       start: pos,
       end,
       identifier: str.slice(identifierStart, identifierEnd + 1)
-      // identifierType: exportType,
-      // match: str.slice(pos, end + 1)
     };
   }
 
@@ -260,7 +255,6 @@ function* tokenize(str, options) {
       end: moduleEnd,
       identifier: str.slice(identifierStart, identifierEnd),
       moduleName: str.slice(moduleStart, moduleEnd + 1)
-      // match: str.slice(pos, end + 1),
     };
   }
 
@@ -282,7 +276,7 @@ function* tokenize(str, options) {
         type: "reExportImported",
         start: pos,
         end,
-        exports: destructureModules(str.slice(braceStart, braceEnd + 1))
+        modules: destructureModules(str.slice(braceStart, braceEnd + 1))
       };
     }
 
@@ -296,8 +290,8 @@ function* tokenize(str, options) {
       type: "reExport",
       start: pos,
       end,
-      exports: destructureModules(str.slice(braceStart, braceEnd + 1)),
-      from: str.slice(moduleStart, moduleEnd + 1)
+      modules: destructureModules(str.slice(braceStart, braceEnd + 1)),
+      moduleName: str.slice(moduleStart, moduleEnd + 1)
     };
   }
 
