@@ -26,6 +26,7 @@
   "scripts": {
     "build:core": "node scripts/core.js",
     "build:gulp": "node scripts/gulp.js",
+    "build:site": "browserify src/core.js docs/main.js -o docs/app.js && uglifyjs.cmd docs/app.js -o docs/app.js",
     "publish:core": "node scripts/backup.js && node scripts/core.js && npm publish && node scripts/restore.js",
     "publish:gulp": "node scripts/backup.js && node scripts/gulp.js && npm publish && node scripts/restore.js",
     "test": "node test/test.js",

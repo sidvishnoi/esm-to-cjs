@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>esm-to-cjs playground</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+</head>
+
+<body>
+  <header>
+    <h1><a href="https://github.com/sidvishnoi/esm-to-cjs/">esm-to-cjs</a> playground</h1>
+    <button id="settings">⚙ Settings</button>
+  </header>
+  <div class="editors">
+    <div class="editor" id="input">// add your ESM code here
+import { resolve as resolvePath, join } from "path";
+import { readFileSync } from "fs";
+
+export function read(src) {
+return readFileSync(join(__dirname, src), "utf8");
+}</div>
+
+    <div class="editor" id="output">aha</div>
+  </div>
+
+  <form id="options">
+    <div>
+      <h2>Options</h2>
+      <label>lenIdentifier<input name="lenIdentifier" type="number" value="20" min="1"></label>
+      <label>lenModuleName<input name="lenModuleName" type="number" value="20" min="1"></label>
+      <label>lenDestructure<input name="lenDestructure" type="number" value="60" min="1"></label>
+      <label>indent<input name="indent" type="number" value="2" min="0"></label>
+      <label>quote<input name="quote" type="text" value="'" pattern="^[\x22|\x27]$"></label>
+    </div>
+  </form>
+
+  <script src=" https://unpkg.com/ace-builds@1.4.1/src-min/ace.js">
+  </script> <script src="app.js"></script>
+
+</body>
+
+</html>

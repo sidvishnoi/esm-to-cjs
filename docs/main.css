@@ -1,0 +1,89 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  overflow: hidden;
+}
+
+header {
+  height: 4em;
+  padding: 1em;
+  width: 100vw;
+  background: #115;
+  color: #fff;
+  font-family: "Roboto Mono", "Courier New", Courier, monospace;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 0.2em solid #0606af;
+}
+
+header a {
+  color: #ffeb3b
+}
+
+header button {
+  border: none;
+  background: #b71c1c;
+  color: #fff;
+  font-size: 1.2em;
+  padding: 0.5em;
+}
+
+.editors {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 4em;
+  overflow: auto;
+}
+
+.editor {
+  height: 100%;
+  width: 50%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+#output {
+  left: 50%;
+}
+
+#options {
+  height: 100vh;
+  width: 100%;
+  background: #fff;
+  height: calc(100vh - 4em);
+  position: fixed;
+  top: -200vh;
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+#options.open {
+  top: 4em;
+}
+
+#options div {
+  padding: 3em 0;
+  width: 300px;
+}
+
+#options label {
+  display: flex;
+  justify-content: space-between;
+  margin: 1em 0;
+}
+
+#options input {
+  width: 4em;
+}
