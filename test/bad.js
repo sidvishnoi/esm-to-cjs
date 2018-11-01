@@ -1,7 +1,7 @@
 const { readFileSync } = require("fs");
 const { join } = require("path");
 
-const { runTransform } = require("../index");
+const { runTransform } = require("../src/core");
 
 module.exports = main;
 

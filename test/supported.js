@@ -2,7 +2,7 @@ const { readFileSync } = require("fs");
 const { join } = require("path");
 const Table = require("easy-table");
 
-const { runTransform } = require("../index");
+const { runTransform } = require("../src/core");
 
 module.exports = main;
 

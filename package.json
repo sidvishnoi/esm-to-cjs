@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Transform ESM to Common JS for NodeJS",
   "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
     "test": "node test/test.js"
   },
