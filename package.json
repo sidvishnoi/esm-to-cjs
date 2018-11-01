@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "nyc node test/test.js"
+    "test": "node test/test.js"
   },
   "keywords": [
     "esm",
@@ -17,7 +17,6 @@
   "author": "Sid Vishnoi <sidvishnoi8@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "easy-table": "^1.1.1",
-    "nyc": "^13.1.0"
+    "easy-table": "^1.1.1"
   }
 }
