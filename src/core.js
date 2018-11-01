@@ -62,7 +62,8 @@ function transform(token, str, exportBuffer, { indent }) {
     }
     case "import*": {
       const { identifier, moduleName } = token;
-      return `const ${identifier} = require(${moduleName})`;
+      return `const ${identifier} =
+      require(${moduleName})`;
     }
     case "awaitImport": {
       return `require(${token.moduleName})`;
@@ -88,7 +89,7 @@ function transform(token, str, exportBuffer, { indent }) {
         .map(([original]) => `${indent}${original}: __${original}__`)
         .join(",\n");
       exportBuffer.requires.push(names);
-      exportBuffer.requires.push(`\n} = require(${moduleName});`);
+      exportBuffer.requires.push(`} = require(${moduleName});`);
 
       for (const [original, alias] of token.modules) {
         exportBuffer.items.push([alias ? alias : original, `__${original}__`]);
