@@ -1,7 +1,7 @@
 const through = require("through2");
 const { runTransform } = require("./core");
 
-const PLUGIN_NAME = "gulp-esm2cjs";
+const PLUGIN_NAME = "gulp-esm-to-cjs";
 
 module.exports = options => {
   return through.obj(function(file, enc, cb) {

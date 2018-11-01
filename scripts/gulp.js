@@ -6,10 +6,10 @@ try {
     json.tests = undefined;
     json.devDependencies = undefined;
     json.keywords.push("gulpplugin");
-    json.name = "gulp-esm2cjs";
+    json.name = "gulp-esm-to-cjs";
   });
   copyFile("./src/gulp.js", "./index.js", str => {
-    return str.replace("./core", "esm2cjs");
+    return str.replace("./core", "esm-to-cjs");
   });
 } catch (err) {
   console.error(err);

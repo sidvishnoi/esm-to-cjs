@@ -1,5 +1,5 @@
 {
-  "name": "esm2cjs",
+  "name": "esm-to-cjs",
   "version": "1.0.0",
   "description": "Transform ESM to Common JS for present NodeJS, without any junk wrappers or useless renaming",
   "keywords": [
@@ -8,11 +8,11 @@
     "esm",
     "module"
   ],
-  "homepage": "https://github.com/sidvishnoi/esm2cjs#readme",
+  "homepage": "https://github.com/sidvishnoi/esm-to-cjs#readme",
   "bugs": {
-    "url": "https://github.com/sidvishnoi/esm2cjs/issues"
+    "url": "https://github.com/sidvishnoi/esm-to-cjs/issues"
   },
-  "repository": "sidvishnoi/esm2cjs",
+  "repository": "sidvishnoi/esm-to-cjs",
   "license": "MIT",
   "author": {
     "name": "Sid Vishnoi",
@@ -26,8 +26,8 @@
   "scripts": {
     "build:core": "node scripts/core.js",
     "build:gulp": "node scripts/gulp.js",
-    "publish:core": "node scripts/backup.js && node scripts/core.js && node scripts/restore.js",
-    "publish:gulp": "node scripts/backup.js && node scripts/gulp.js && node scripts/restore.js",
+    "publish:core": "node scripts/backup.js && node scripts/core.js",
+    "publish:gulp": "node scripts/backup.js && node scripts/gulp.js && npm publish && node scripts/restore.js",
     "test": "node test/test.js",
     "util:backup": "node scripts/backup.js",
     "util:restore": "node scripts/restore.js"

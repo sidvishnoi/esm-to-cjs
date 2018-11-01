@@ -1,4 +1,4 @@
-## esm2cjs
+## esm-to-cjs
 
 > Transform ESM to Common JS for present NodeJS, without any junk wrappers or useless renaming.
 
@@ -89,7 +89,7 @@ exports.baz = lorem1.baz;
 ```
 
 
-So, I created this tool using some simple string manipulations. A lot of sample input/output are [available here](https://github.com/sidvishnoi/esm2cjs/blob/master/test/fixtures/supported.md).
+So, I created this tool using some simple string manipulations. A lot of sample input/output are [available here](https://github.com/sidvishnoi/esm-to-cjs/blob/master/test/fixtures/supported.md).
 
 
 
@@ -103,23 +103,23 @@ So, I created this tool using some simple string manipulations. A lot of sample 
 
 This tool is available in form of two packages:
 
-- `esm2cjs`: the core module.
-- `gulp-esm2cjs`: as a gulp plugin.
+- `esm-to-cjs`: the core module.
+- `gulp-esm-to-cjs`: as a gulp plugin.
 
-### `esm2cjs`
+### `esm-to-cjs`
 
 This is the core module. It includes a tokenizer and a transformer. I didn't use some specific JS parser due to overheads and created my own using string manipulation.
 
 **Install:**
 
 ```
-npm i --save-dev esm2cjs
+npm i --save-dev esm-to-cjs
 ```
 
 **Usage:**
 
 ``` js
-const { runTransform } = require("esm2cjs");
+const { runTransform } = require("esm-to-cjs");
 
 const input = `import { resolve as resolvePath } from "path";`
 const options = { quote: "double" }; // see details below
@@ -159,26 +159,26 @@ indent:
 ```
 
 
-### `gulp-esm2cjs`
+### `gulp-esm-to-cjs`
 
-Gulp plugin for esm2cjs.
+Gulp plugin for esm-to-cjs.
 
 **Install**:
 
 ```
-npm i --save-dev gulp-esm2cjs
+npm i --save-dev gulp-esm-to-cjs
 ```
 
 **Usage**:
 
 ``` js
 // gulpfile.js
-const esm2cjs = require("gulp-esm2cjs");
+const esm-to-cjs = require("gulp-esm-to-cjs");
 
 function convert() {
   return gulp
     .src(src)
-    .pipe(esm2cjs(options))
+    .pipe(esm-to-cjs(options))
     .pipe(gulp.dest(dest));
 }
 module.exports.convert = convert;
@@ -190,6 +190,6 @@ module.exports.convert = convert;
 
 ## Contributing
 
-- If you've issues regarding the project - documentation, supported features and transformations etc., please file them on [GitHub](https://github.com/sidvishnoi/esm2cjs/issues) where we can discuss.
+- If you've issues regarding the project - documentation, supported features and transformations etc., please file them on [GitHub](https://github.com/sidvishnoi/esm-to-cjs/issues) where we can discuss.
 - Pull requests are welcome!
 - Please bear in mind that I created this project in a hurry, so the code isn't very impressive. Also, I didn't add all the transformations. See limitations above. Would be nice if we can overcome them!
