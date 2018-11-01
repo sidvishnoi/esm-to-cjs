@@ -32,21 +32,22 @@ const { foo } = require("bar");
 ``` javascript
 import { foo } from "bar"
 
-import * as bar from "bar"
+import * as bar from "bar";
 
 export { foo as bar, baz } from "aha";
 ```
 ``` javascript
-const { foo } = require("bar");
+const { foo } = require("bar")
+
 const bar = require("bar");
 
 const {
   foo: __foo__,
-  baz: __baz__,
+  baz: __baz__
 } = require("aha");
 module.exports = {
   bar: __foo__,
-  baz: __baz__,
+  baz: __baz__
 }
 ```
 ---
@@ -99,7 +100,7 @@ export const foo = 5;
 ``` javascript
 const foo = 5;
 module.exports = {
-  foo,
+  foo
 }
 ```
 ---
@@ -112,7 +113,7 @@ export function foo(blah) {}
 ``` javascript
 function foo(blah) {}
 module.exports = {
-  foo,
+  foo
 }
 ```
 ---
@@ -125,31 +126,31 @@ export class foo {};
 ``` javascript
 class foo {};
 module.exports = {
-  foo,
+  foo
 }
 ```
 ---
 ``` json
-{"title": "re-export simple" }
+{"title": "single re-export" }
 ```
 ``` javascript
 export { foo } from "bar";
 ```
 ``` javascript
 module.exports = {
-  foo: require("bar").foo,
+  foo: require("bar").foo
 }
 ```
 ---
 ``` json
-{"title": "re-export with rename" }
+{"title": "single re-export with rename" }
 ```
 ``` javascript
 export { foo as bar } from "baz";
 ```
 ``` javascript
 module.exports = {
-  bar: require("baz").foo,
+  bar: require("baz").foo
 }
 ```
 ---
@@ -162,11 +163,11 @@ export { foo, bar } from "baz";
 ``` javascript
 const {
   foo: __foo__,
-  bar: __bar__,
+  bar: __bar__
 } = require("baz");
 module.exports = {
   foo: __foo__,
-  bar: __bar__,
+  bar: __bar__
 }
 ```
 ---
@@ -179,16 +180,16 @@ export { foo as wow, bar } from "lorem";
 ``` javascript
 const {
   foo: __foo__,
-  bar: __bar__,
+  bar: __bar__
 } = require("lorem");
 module.exports = {
   wow: __foo__,
-  bar: __bar__,
+  bar: __bar__
 }
 ```
 ---
 ``` json
-{"title": "multiple re-exports from module with name having non-alphanum characters", "maxModuleNameLength": 40 }
+{"title": "multiple re-exports from module with name having non-alphanum characters", "lenModuleName": 40 }
 ```
 ``` javascript
 export { foo, bar } from "./module/aha/w-o-w/d.json";
@@ -196,11 +197,11 @@ export { foo, bar } from "./module/aha/w-o-w/d.json";
 ``` javascript
 const {
   foo: __foo__,
-  bar: __bar__,
+  bar: __bar__
 } = require("./module/aha/w-o-w/d.json");
 module.exports = {
   foo: __foo__,
-  bar: __bar__,
+  bar: __bar__
 }
 ```
 ---
@@ -211,15 +212,11 @@ module.exports = {
 import {
   a,
   b as c,
-  d,
+  d
 } from "bar";
 ```
 ``` javascript
-const {
-  a,
-  b: c,
-  d,
-} = require("bar");
+const { a, b: c, d } = require("bar");
 ```
 ---
 ``` json
@@ -250,7 +247,7 @@ function bar(some, ...args) {
 }
 module.exports = {
   foo,
-  bar,
+  bar
 }
 ```
 ---
@@ -263,11 +260,11 @@ export { foo, bar } from "module";
 ``` javascript
 const {
     foo: __foo__,
-    bar: __bar__,
+    bar: __bar__
 } = require("module");
 module.exports = {
     foo: __foo__,
-    bar: __bar__,
+    bar: __bar__
 }
 ```
 ---
@@ -278,11 +275,9 @@ module.exports = {
 export const foo = 5;
 
 
-
-
-
-
 export const bar = 6;
+
+
 
 
 
@@ -290,11 +285,16 @@ export const bar = 6;
 ``` javascript
 const foo = 5;
 
+
 const bar = 6;
+
+
+
+
 
 module.exports = {
   foo,
-  bar,
+  bar
 }
 ```
 ---
@@ -328,7 +328,7 @@ const bar = 6;
 
 module.exports = {
   foo,
-  bar,
+  bar
 }
 ```
 ---
@@ -370,16 +370,14 @@ export { s as r };
 ```
 ``` javascript
 const { a, b: c, d } = require("m1");
-const {
-  e,
-  f: g,
-  h
-} = require("m1/2");
+const { e, f: g, h } = require("m1/2");
 const path = require("path");
 
 const i = require("m2");
 
 const j = 5;
+
+
 
 class l {
   constructor(name) {
@@ -391,9 +389,13 @@ function m() {
 
 }
 
+
+
+
+
 const {
   n: __n__,
-  o: __o__,
+  o: __o__
 } = require("m4");
 module.exports = {
   j,
@@ -403,7 +405,7 @@ module.exports = {
   n: __n__,
   p: __o__,
   q,
-  s: r,
+  s: r
 }
 ```
 ***

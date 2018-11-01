@@ -1,23 +1,21 @@
 module.exports.runTransform = runTransform;
 
-// globals:
-
 // gives parsing errors better description
 let LOOKING_FOR;
 // length/distance defaults during parsing
 const DISTANCE = 6;
 
 const defaultOptions = {
-  quoteType: '"',
-  maxObjectLiteralLength: 60,
-  maxModuleNameLength: 20,
-  maxIdentifierLength: 20,
+  quote: "double",
+  lenDestructure: 60,
+  lenModuleName: 20,
+  lenIdentifier: 20,
   indent: 2,
-  removeMultipleNewLines: true
 };
 
 function runTransform(str, options = {}) {
   options = { ...defaultOptions, ...options };
+  options.quote = options.quote === "single" ? "'" : '"';
   const buffer = [];
   const exportBuffer = {
     items: [],
@@ -31,25 +29,25 @@ function runTransform(str, options = {}) {
     pos = token.end + 1;
   }
 
-  // add remaining of string
+  // add rest of input
+  pos = skipNewLines(str, pos);
   buffer.push(str.slice(pos, str.length));
 
   if (exportBuffer.items.length) {
+    const indent = " ".repeat(options.indent);
     // add module.exports
-    if (exportBuffer.requires.length) buffer.push("\n");
     for (const item of exportBuffer.requires) {
       buffer.push(item);
     }
     buffer.push("\nmodule.exports = {\n");
-    for (const item of exportBuffer.items) {
-      buffer.push(item);
-    }
-    buffer.push("}");
+    const exportNames = exportBuffer.items.map(
+      item => `${indent}${item[0]}${item[1] ? `: ${item[1]}` : ""}`
+    );
+    buffer.push(exportNames.join(",\n"));
+    buffer.push("\n}");
   }
+
   buffer.push("\n"); // end file
-  if (options.removeMultipleNewLines) {
-    return buffer.join("").replace(/\n{3,}/g, "\n\n");
-  }
   return buffer.join("");
 }
 
@@ -59,60 +57,48 @@ function transform(token, str, exportBuffer, { indent }) {
   const { type } = token;
   switch (type) {
     case "import": {
-      const identifiers = token.imports.replace(/ as /g, ": ");
+      const identifiers = token.imports.map(s => s.join(": ")).join(", ");
       const moduleName = token.from;
-      return `const ${identifiers} = require(${moduleName});`;
+      return `const { ${identifiers} } = require(${moduleName})`;
     }
     case "import*": {
       const { identifier, moduleName } = token;
-      return `const ${identifier} = require(${moduleName});`;
+      return `const ${identifier} = require(${moduleName})`;
     }
     case "awaitImport": {
-      return `require(${token.moduleName});`;
+      return `require(${token.moduleName})`;
     }
     case "export": {
-      if (token.identifierType) {
-        exportBuffer.items.push(`${indent}${token.identifier},\n`);
-      }
+      exportBuffer.items.push([token.identifier]);
       return "";
     }
     case "reExport": {
-      let identifiers = token.exports.split(/,\s*/).map(s => s.trim());
-      if (identifiers.length > 1) {
-        identifiers = identifiers.map(s => {
-          if (s.includes("as")) {
-            const [id, alias] = s.split(/\s+as\s+/);
-            return { newId: `__${id}__`, id, alias };
-          } else {
-            return { newId: `__${s}__`, id: s, alias: s };
-          }
-        });
-      } else {
-        const [id, alias] = identifiers[0].split(/\s+as\s+/);
-        identifiers = [{ id, alias: alias ? alias : id }];
-      }
       const moduleName = token.from;
-      if (identifiers.length > 1) {
-        exportBuffer.requires.push("const {\n");
-        for ({ alias, newId, id } of identifiers) {
-          exportBuffer.items.push(`${indent}${alias}: ${newId},\n`);
-          exportBuffer.requires.push(`${indent}${id}: ${newId},\n`);
-        }
-        exportBuffer.requires.push(`} = require(${moduleName});`);
-      } else {
-        const { id, alias } = identifiers[0];
-        exportBuffer.items.push(
-          `${indent}${alias}: require(${moduleName}).${id},\n`
-        );
+
+      if (token.exports.length === 1) {
+        const [original, alias] = token.exports[0];
+        exportBuffer.items.push([
+          alias ? alias : original,
+          `require(${moduleName}).${original}`
+        ]);
+        return;
       }
+
+      exportBuffer.requires.push("const {\n");
+      const names = token.exports
+        .map(([original]) => `${indent}${original}: __${original}__`)
+        .join(",\n");
+      exportBuffer.requires.push(names);
+      exportBuffer.requires.push(`\n} = require(${moduleName});`);
+
+      for (const [original, alias] of token.exports) {
+        exportBuffer.items.push([alias ? alias : original, `__${original}__`]);
+      }
+
       return "";
     }
     case "reExportImported": {
-      const identifiers = token.exports.split(/,\s*/).map(s => {
-        const [id, alias] = s.trim().split(/\s+as\s+/);
-        return `${indent}${id}${alias ? ": " + alias : ""},\n`;
-      });
-      exportBuffer.items.push(...identifiers);
+      exportBuffer.items.push(...token.exports);
       return "";
     }
     default:
@@ -123,12 +109,7 @@ function transform(token, str, exportBuffer, { indent }) {
 String.prototype.indexWithin = indexWithin;
 
 function* tokenize(str, options) {
-  const {
-    quoteType,
-    maxObjectLiteralLength,
-    maxModuleNameLength,
-    maxIdentifierLength
-  } = options;
+  const { quote, lenDestructure, lenModuleName, lenIdentifier } = options;
 
   let start = 0;
   let pos;
@@ -138,27 +119,16 @@ function* tokenize(str, options) {
     ["export", "export "],
     ["awaitImport", "await import("]
   ]);
-  const lastSearchPositions = new Map([
-    ["import", start],
-    ["export", start],
-    ["awaitImport", start]
-  ]);
 
   while (types.size !== 0) {
-    for (const t of types.keys()) {
-      let idx = str.indexOf(types.get(t), start);
-      if (idx === -1) {
-        types.delete(t);
-        lastSearchPositions.set(t, Number.POSITIVE_INFINITY);
-      } else {
-        lastSearchPositions.set(t, idx);
-      }
-    }
-
+    // look for first matching pattern
     pos = Number.POSITIVE_INFINITY;
     let type;
-    for (const [t, idx] of lastSearchPositions.entries()) {
-      if (idx < pos) {
+    for (const t of types.keys()) {
+      const idx = str.indexOf(types.get(t), start);
+      if (idx === -1) {
+        types.delete(t);
+      } else if (idx < pos) {
         pos = idx;
         type = t;
       }
@@ -181,46 +151,27 @@ function* tokenize(str, options) {
   // import * as IDENTIFIER from "MODULE"
   function handleImport() {
     LOOKING_FOR = "import names";
-    const braceStart = str.indexWithin(
-      "{",
-      pos + "import ".length,
-      DISTANCE,
-      false
-    );
+    const braceStart = str.indexWithin("{", pos + 7, DISTANCE, false);
+    // 7 === "import ".length
     if (braceStart === -1) {
       // try to see if it's `import *`
       return handleImportStar();
     }
 
-    const braceEnd = str.indexWithin(
-      "}",
-      braceStart + 1,
-      maxObjectLiteralLength
-    );
+    const braceEnd = str.indexWithin("}", braceStart + 1, lenDestructure);
 
     LOOKING_FOR = "name of imported module";
     let moduleStart = str.indexWithin("from ", braceEnd + 1, DISTANCE);
-    moduleStart = str.indexWithin(quoteType, moduleStart + 1, 5);
-    const moduleEnd = str.indexWithin(
-      quoteType,
-      moduleStart + 1,
-      maxModuleNameLength
-    );
+    moduleStart = str.indexWithin(quote, moduleStart + 1, 5);
+    const moduleEnd = str.indexWithin(quote, moduleStart + 1, lenModuleName);
 
-    let end = moduleEnd + 1;
-    if (str.charAt(end + 1) === ";") ++end;
-
-    start = end + 1;
+    start = moduleEnd + 1;
     return {
       type: "import",
       start: pos,
-      end,
-      // braceStart,
-      // braceEnd,
-      // moduleStart,
-      // moduleEnd,
-      match: str.slice(pos, end + 1),
-      imports: str.slice(braceStart, braceEnd + 1),
+      end: moduleEnd,
+      // match: str.slice(pos, moduleEnd + 1),
+      imports: destructureModules(str.slice(braceStart, braceEnd + 1)),
       from: str.slice(moduleStart, moduleEnd + 1)
     };
   }
@@ -228,23 +179,17 @@ function* tokenize(str, options) {
   // await import(...)
   function handleAwaitImport() {
     LOOKING_FOR = "name of imported module for await import()";
-    const moduleStart =
-      str.indexWithin("(", pos + "await import".length, 10) + 1;
-    const moduleEnd =
-      str.indexWithin(")", moduleStart + 1, maxIdentifierLength) - 1;
+    const moduleStart = str.indexWithin("(", pos + 12, 10) + 1;
+    // 12 === "await import".length
+    const moduleEnd = str.indexWithin(")", moduleStart + 1, lenIdentifier) - 1;
 
-    let end = moduleEnd + 1;
-    if (str.charAt(end + 1) === ";") ++end;
-
-    start = end + 1;
+    start = moduleEnd + 2;
     return {
       type: "awaitImport",
       start: pos,
-      end,
-      // moduleStart,
-      // moduleEnd,
-      moduleName: str.slice(moduleStart, moduleEnd + 1),
-      match: str.slice(pos, end + 1)
+      end: moduleEnd + 1,
+      moduleName: str.slice(moduleStart, moduleEnd + 1)
+      // match: str.slice(pos, end + 1)
     };
   }
 
@@ -256,48 +201,39 @@ function* tokenize(str, options) {
   function handleExport() {
     LOOKING_FOR = "export pattern";
     const skipStart = pos + "export ".length;
-    let exportType;
+
     if (str.indexWithin("{", skipStart, 5, false) !== -1) {
-      exportType = "reExport";
-    } else if (str.indexWithin("*", skipStart, 5, false) !== -1) {
-      exportType = "export*";
-    } else {
-      LOOKING_FOR = "identifier type (function|class|const) for export";
-      const typeEnd = str.indexWithin(" ", skipStart, 9);
-      // 9 === "function".length + 1
-      exportType = str.slice(skipStart, typeEnd);
-    }
-
-    if (exportType === "reExport") {
       return handleReExport();
-    } else if (exportType === "export*") {
+    } else if (str.indexWithin("*", skipStart, 5, false) !== -1) {
       return handleExportStar();
-    } else if (exportType !== "") {
-      LOOKING_FOR = "export identifiers";
-      const identifierStart =
-        str.indexWithin(" ", skipStart + exportType.length, 5) + 1;
-
-      const identifierEnd =
-        str.indexWithin(
-          exportType === "function" ? "(" : " ",
-          identifierStart,
-          maxIdentifierLength
-        ) - 1;
-
-      const end = pos + "export".length;
-
-      start = end + 1;
-      return {
-        type: "export",
-        start: pos,
-        end,
-        // identifierStart,
-        // identifierEnd,
-        identifierType: exportType,
-        identifier: str.slice(identifierStart, identifierEnd + 1),
-        match: str.slice(pos, end + 1)
-      };
     }
+
+    LOOKING_FOR = "identifier type (function|class|const) for export";
+    const typeEnd = str.indexWithin(" ", skipStart, 9);
+    // 9 === "function".length + 1
+    const exportType = str.slice(skipStart, typeEnd);
+
+    LOOKING_FOR = "export identifiers";
+    const identifierStart =
+      str.indexWithin(" ", skipStart + exportType.length, 5) + 1;
+    const identifierEnd =
+      str.indexWithin(
+        exportType === "function" ? "(" : " ",
+        identifierStart,
+        lenIdentifier
+      ) - 1;
+
+    const end = pos + 6; // 6 == "export".length;
+
+    start = end + 1;
+    return {
+      type: "export",
+      start: pos,
+      end,
+      identifier: str.slice(identifierStart, identifierEnd + 1)
+      // identifierType: exportType,
+      // match: str.slice(pos, end + 1)
+    };
   }
 
   // import * as IDENTIFIER from "MODULE"
@@ -308,34 +244,23 @@ function* tokenize(str, options) {
     const identifierEnd = str.indexWithin(
       " ",
       identifierStart + 1,
-      maxIdentifierLength
+      lenIdentifier
     );
 
     LOOKING_FOR = "name of imported module for import*";
     let moduleStart =
       str.indexWithin("from ", identifierEnd + 1) + "from".length;
-    moduleStart = str.indexWithin(quoteType, moduleStart + 1);
-    const moduleEnd = str.indexWithin(
-      quoteType,
-      moduleStart + 1,
-      maxModuleNameLength
-    );
+    moduleStart = str.indexWithin(quote, moduleStart + 1);
+    const moduleEnd = str.indexWithin(quote, moduleStart + 1, lenModuleName);
 
-    let end = moduleEnd;
-    if (str.charAt(end + 1) === ";") ++end;
-
-    start = end + 1;
+    start = moduleEnd + 1;
     return {
       type: "import*",
       start: pos,
-      end,
-      // identifierStart,
-      // identifierEnd,
-      // moduleStart,
-      // moduleEnd,
-      match: str.slice(pos, end + 1),
+      end: moduleEnd,
       identifier: str.slice(identifierStart, identifierEnd),
       moduleName: str.slice(moduleStart, moduleEnd + 1)
+      // match: str.slice(pos, end + 1),
     };
   }
 
@@ -343,57 +268,51 @@ function* tokenize(str, options) {
   function handleReExport() {
     LOOKING_FOR = "export pattern for re-export";
     const braceStart = str.indexWithin("{", pos + "export ".length, 5);
-    const braceEnd = str.indexWithin(
-      "}",
-      braceStart + 1,
-      maxObjectLiteralLength
-    );
+    const braceEnd = str.indexWithin("}", braceStart + 1, lenDestructure);
 
     LOOKING_FOR = "name of re-exported module";
     let moduleStart = str.indexWithin("from ", braceEnd + 1, 10, false);
+
     if (moduleStart === -1) {
       // export { ... }
-      let end = braceEnd;
-      if (str.charAt(end + 1) === ";") ++end;
+      const end = skipNewLines(str, braceEnd);
 
       start = end + 1;
       return {
         type: "reExportImported",
         start: pos,
         end,
-        // braceStart,
-        // braceEnd,
-        exports: str.slice(braceStart + 1, braceEnd),
-        match: str.slice(pos, end + 1)
+        exports: destructureModules(str.slice(braceStart, braceEnd + 1))
       };
     }
-    moduleStart = str.indexWithin(quoteType, moduleStart, "from ".length + 4);
-    const moduleEnd = str.indexWithin(
-      quoteType,
-      moduleStart + 1,
-      maxModuleNameLength
-    );
 
-    let end = moduleEnd;
-    if (str.charAt(end + 1) === ";") ++end;
+    moduleStart = str.indexWithin(quote, moduleStart, "from ".length + 4);
+    const moduleEnd = str.indexWithin(quote, moduleStart + 1, lenModuleName);
+
+    const end = skipNewLines(str, moduleEnd);
 
     start = end + 1;
     return {
       type: "reExport",
       start: pos,
       end,
-      // braceStart,
-      // braceEnd,
-      // moduleStart,
-      // moduleEnd,
-      exports: str.slice(braceStart + 1, braceEnd),
-      from: str.slice(moduleStart, moduleEnd + 1),
-      match: str.slice(pos, end + 1)
+      exports: destructureModules(str.slice(braceStart, braceEnd + 1)),
+      from: str.slice(moduleStart, moduleEnd + 1)
     };
   }
 
   function handleExportStar() {
     throw new Error("not implemented");
+  }
+
+  function destructureModules(objLiteral) {
+    return objLiteral
+      .trim()
+      .slice(1, -1)
+      .split(/,\s*/)
+      .map(i => i.trim())
+      .filter(i => i)
+      .map(i => i.split(/\s*as\s*/));
   }
 }
 
@@ -426,4 +345,12 @@ function indexWithin(needle, from, within = 99, throws = true) {
   } else {
     return -1;
   }
+}
+
+function skipNewLines(str, i) {
+  if (str.charAt(i + 1) === ";") ++i;
+  while (i < str.length && /\s/.test(str.charAt(i))) {
+    ++i;
+  }
+  return i;
 }
