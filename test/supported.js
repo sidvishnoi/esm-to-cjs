@@ -8,7 +8,7 @@ module.exports = main;
 
 function main(stats) {
   const fixtures = readFileSync(
-    join(__dirname, "./fixtures/supported.txt"),
+    join(__dirname, "./fixtures/supported.md"),
     "utf8"
   );
   const failing = [];
@@ -27,7 +27,7 @@ function main(stats) {
       failing.push(fixture);
     }
   }
-  printFailing(failing);
+  // printFailing(failing);
 }
 
 function printFailing(failing) {
@@ -84,18 +84,27 @@ function printFailing(failing) {
 
 function* getFixtures(str) {
   const lines = str.split("\n");
-  for (let i = 0, length = lines.length, testId = 0; i < length; ++i) {
+  for (let i = 7, length = lines.length, testId = 0; i < length;) {
     const lineStart = i;
-    if (!lines[i]) break;
-    const { title, skip, ...options } = JSON.parse(lines[i]);
-    i += 2;
-    let j = lines.indexOf("---", i);
-    const input = lines.slice(i, j).join("\n");
-    i = j + 1;
-    j = lines.indexOf("======", i);
-    const expected = lines.slice(i, j).join("\n");
-    i = j;
+
+    const optionsStart = lines.indexOf("``` json", i);
+    const optionsEnd = lines.indexOf("```", optionsStart + 1);
+    const { title, skip, ...options } = JSON.parse(
+      lines.slice(optionsStart + 1, optionsEnd).join("\n")
+    );
+
+    const inputStart = lines.indexOf("``` javascript", optionsEnd + 1);
+    const inputEnd = lines.indexOf("```", inputStart + 1);
+    const input = lines.slice(inputStart + 1, inputEnd).join("\n");
+
+    const expectedStart = lines.indexOf("``` javascript", inputEnd + 1);
+    const expectedEnd = lines.indexOf("```", expectedStart + 1);
+    const expected = lines.slice(expectedStart + 1, expectedEnd).join("\n");
+
     ++testId;
+
+    i = lines.indexOf("---", expectedEnd);
+
     yield {
       skip,
       line: lineStart + 1,
@@ -106,6 +115,6 @@ function* getFixtures(str) {
       testId
     };
 
-    if (!lines[i].startsWith("======")) break;
+    if (i === -1) break;
   }
 }
