@@ -1,3 +1,4 @@
 node_modules
 package-lock.json
-BACKUP
+package.backup.json
+index.js

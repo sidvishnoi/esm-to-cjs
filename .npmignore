@@ -1,1 +1,5 @@
 test
+scripts
+src
+package.backup.json
+.gitignore
