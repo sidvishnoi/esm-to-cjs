@@ -25,7 +25,6 @@ function main(stats) {
       fixture.fail = true;
       fixture.actual = result;
       failing.push(fixture);
-      break;
     }
   }
   printFailing(failing);
