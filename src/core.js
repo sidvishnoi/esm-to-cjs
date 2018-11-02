@@ -60,9 +60,12 @@ function transform(token, str, exportBuffer, { indent }) {
       const identifiers = token.modules.map(s => s.join(": ")).join(", ");
       return `const { ${identifiers} } = require(${token.moduleName})`;
     }
-    case "import*": {
+    case "import*":
+    case "importDefault": {
       const { identifier, moduleName } = token;
-      return `const ${identifier} = require(${moduleName})`;
+      return `const ${identifier} = require(${moduleName})${
+        token.isDefaultImport ? ".default" : ""
+      }`;
     }
     case "awaitImport": {
       return `require(${token.moduleName})`;
@@ -246,7 +249,11 @@ function* tokenize(str, options) {
   // import * as IDENTIFIER from "MODULE"
   function handleImportStar() {
     LOOKING_FOR = "import name for import*";
-    const identifierStart = str.indexWithin("* as ", pos + 7, DISTANCE) + 5;
+    let identifierStart = str.indexWithin("* as ", pos + 7, DISTANCE, false);
+    if (identifierStart === -1) {
+      return handleDefaultImport();
+    }
+    identifierStart += 5;
     // 7 === "import ".length, 5 === "* as ".length
     const identifierEnd = str.indexWithin(
       " ",
@@ -265,6 +272,29 @@ function* tokenize(str, options) {
       type: "import*",
       start: pos,
       end: moduleEnd,
+      identifier: str.slice(identifierStart, identifierEnd),
+      moduleName: str.slice(moduleStart, moduleEnd + 1)
+    };
+  }
+
+  // import IDENTIFIER from "MODULE"
+  function handleDefaultImport() {
+    LOOKING_FOR = "import name for default import";
+    const identifierStart = pos + 7; // 7 === "import ".length
+    const identifierEnd = str.indexWithin(" ", identifierStart, DISTANCE);
+
+    LOOKING_FOR = "name of imported module for import*";
+    let moduleStart =
+      str.indexWithin("from ", identifierEnd + 1) + "from".length;
+    moduleStart = str.indexWithin(quote, moduleStart + 1);
+    const moduleEnd = str.indexWithin(quote, moduleStart + 1, lenModuleName);
+
+    start = moduleEnd + 1;
+    return {
+      type: "importDefault",
+      start: pos,
+      end: moduleEnd,
+      isDefaultImport: true,
       identifier: str.slice(identifierStart, identifierEnd),
       moduleName: str.slice(moduleStart, moduleEnd + 1)
     };

@@ -81,6 +81,16 @@ import * as path from "path";
 const path = require("path");
 ```
 ---
+---
+``` json
+{"title": "default import" }
+```
+``` javascript
+import foo from "bar";
+```
+``` javascript
+const foo = require("bar").default;
+```
 ``` json
 {"title": "await import with module name as variable" }
 ```
@@ -285,7 +295,7 @@ module.exports = {
 ```
 ---
 ``` json
-{"title": "whitespace processing" }
+{"title": "whitespace processing - maps input line to line" }
 ```
 ``` javascript
 export const foo = 5;
@@ -305,40 +315,6 @@ const foo = 5;
 const bar = 6;
 
 
-
-
-
-module.exports = {
-  foo,
-  bar
-}
-```
----
-``` json
-{"title": "disable whitespace processing", "removeMultipleNewLines": false }
-```
-``` javascript
-export const foo = 5;
-
-
-
-
-
-
-export const bar = 6;
-
-
-
-```
-``` javascript
-const foo = 5;
-
-
-
-
-
-
-const bar = 6;
 
 
 
@@ -359,6 +335,7 @@ import {
   h
 } from "m1/2";
 import * as path from "path";
+import foo from "bar";
 
 const i = await import("m2");
 
@@ -377,17 +354,16 @@ export function m() {
 }
 
 export { n, o as p } from "m4";
-
 export { q };
-
 export { s as r };
-
+export default const bar = 10;
 
 ```
 ``` javascript
 const { a, b: c, d } = require("m1");
 const { e, f: g, h } = require("m1/2");
 const path = require("path");
+const foo = require("bar").default;
 
 const i = require("m2");
 
@@ -408,7 +384,7 @@ function m() {
 
 
 
-
+const bar = 10;
 const {
   n: __n__,
   o: __o__
@@ -421,7 +397,8 @@ module.exports = {
   n: __n__,
   p: __o__,
   q,
-  s: r
+  s: r,
+  default: bar
 }
 ```
 ***

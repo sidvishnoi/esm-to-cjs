@@ -7,6 +7,7 @@
 ---
 ``` json
 { "title": "long module name" }
+
 ```
 ``` javascript
 import { foo } from "some-really-long-module-name-that-we-did-not-allow-in-options";
@@ -73,12 +74,5 @@ import { foo } from 'bar';
 ```
 ``` javascript
 import { foo } frOm 'bar';
-```
----
-``` json
-{ "title": "bad syntax 4 - import *" }
-```
-``` javascript
-import * from "bar"
 ```
 ***
