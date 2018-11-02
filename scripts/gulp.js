@@ -7,7 +7,7 @@ try {
     json.devDependencies = undefined;
     json.keywords.push("gulpplugin");
     json.name = "gulp-esm-to-cjs";
-    json.dependencies["esm-to-cjs"] = json.version;
+    json.dependencies["esm-to-cjs"] = "*";
   });
   copyFile("./src/gulp.js", "./index.js", str => {
     return str.replace("./core", "esm-to-cjs");
