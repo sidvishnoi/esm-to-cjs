@@ -7,7 +7,6 @@
 ---
 ``` json
 { "title": "long module name" }
-
 ```
 ``` javascript
 import { foo } from "some-really-long-module-name-that-we-did-not-allow-in-options";

@@ -81,7 +81,6 @@ import * as path from "path";
 const path = require("path");
 ```
 ---
----
 ``` json
 {"title": "default import" }
 ```
@@ -91,6 +90,7 @@ import foo from "bar";
 ``` javascript
 const foo = require("bar").default;
 ```
+---
 ``` json
 {"title": "await import with module name as variable" }
 ```
