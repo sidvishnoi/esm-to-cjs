@@ -68,7 +68,7 @@ function transform(token, str, exportBuffer, { indent }) {
       return `require(${token.moduleName})`;
     }
     case "export": {
-      exportBuffer.items.push([token.identifier]);
+      exportBuffer.items.push(token.modules);
       return "";
     }
     case "reExport": {
@@ -190,14 +190,14 @@ function* tokenize(str, options) {
     };
   }
 
-  // export const IDENTIFIER = ...
-  // export function IDENTIFIER(...) ...
-  // export class IDENTIFIER ...
+  // export [default] const IDENTIFIER = ...
+  // export [default] function IDENTIFIER(...) ...
+  // export [default] class IDENTIFIER ...
   // export { ... } >> handleReExport()
   // export { ... } from "MODULE" >> handleReExport()
   function handleExport() {
     LOOKING_FOR = "export pattern";
-    const skipStart = pos + "export ".length;
+    let skipStart = pos + "export ".length;
 
     if (str.indexWithin("{", skipStart, 5, false) !== -1) {
       return handleReExport();
@@ -206,6 +206,13 @@ function* tokenize(str, options) {
     }
 
     LOOKING_FOR = "identifier type (function|class|const) for export";
+
+    let isDefaultExport = false;
+    if (str.indexWithin("default ", skipStart, DISTANCE, false) !== -1) {
+      skipStart += 9; // 8 === "default ".length;
+      isDefaultExport = true;
+    }
+
     const typeEnd = str.indexWithin(" ", skipStart, 9);
     // 9 === "function".length + 1
     const exportType = str.slice(skipStart, typeEnd);
@@ -220,14 +227,19 @@ function* tokenize(str, options) {
         lenIdentifier
       ) - 1;
 
-    const end = pos + 6; // 6 == "export".length;
+    const end = pos + 6 + (isDefaultExport ? 8 : 0);
+    // 6 == "export".length, 8 === "default ".length;
+
+    const modules = isDefaultExport
+      ? ["default", str.slice(identifierStart, identifierEnd + 1)]
+      : [str.slice(identifierStart, identifierEnd + 1)];
 
     start = end + 1;
     return {
       type: "export",
       start: pos,
       end,
-      identifier: str.slice(identifierStart, identifierEnd + 1)
+      modules
     };
   }
 

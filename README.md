@@ -95,7 +95,7 @@ So, I created this tool using some simple string manipulations. A lot of sample 
 
 ## Limitations
 
-- No default exports and imports! Please use named exports only.
+- No default ~exports and~ imports! Please use named exports only.
 - `import * as foo from "bar";` is converted to `const foo = require("bar");`. Not sure if this is what everyone wants. I did it as per my project requirements.
 - No `export *` syntax.
 
