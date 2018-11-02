@@ -144,6 +144,23 @@ module.exports = {
 ```
 ---
 ``` json
+{"title": "export an async function" }
+```
+``` javascript
+export async function foo(blah) {
+
+}
+```
+``` javascript
+async function foo(blah) {
+
+}
+module.exports = {
+  foo
+}
+```
+---
+``` json
 {"title": "export a class" }
 ```
 ``` javascript

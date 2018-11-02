@@ -210,9 +210,13 @@ function* tokenize(str, options) {
 
     LOOKING_FOR = "identifier type (function|class|const) for export";
 
+    if (str.indexWithin("async ", skipStart, DISTANCE, false) !== -1) {
+      skipStart += 6; // 6 === "async ".length;
+    }
+
     let isDefaultExport = false;
     if (str.indexWithin("default ", skipStart, DISTANCE, false) !== -1) {
-      skipStart += 9; // 8 === "default ".length;
+      skipStart += 8; // 8 === "default ".length;
       isDefaultExport = true;
     }
 
