@@ -74,11 +74,4 @@ import { foo } from 'bar';
 ``` javascript
 import { foo } frOm 'bar';
 ```
----
-``` json
-{ "title": "bad syntax 4 - import *" }
-```
-``` javascript
-import * from "bar"
-```
 ***
