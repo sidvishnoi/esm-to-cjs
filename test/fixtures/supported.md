@@ -105,6 +105,22 @@ module.exports = {
 ```
 ---
 ``` json
+{"title": "default export" }
+```
+``` javascript
+export default const foo = 5;
+export const bar = 6;
+```
+``` javascript
+const foo = 5;
+const bar = 6;
+module.exports = {
+  default: foo,
+  bar
+}
+```
+---
+``` json
 {"title": "export a function" }
 ```
 ``` javascript
