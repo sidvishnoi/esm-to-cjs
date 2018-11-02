@@ -3,3 +3,4 @@ scripts
 src
 package.backup.json
 .gitignore
+docs

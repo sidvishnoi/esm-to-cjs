@@ -173,12 +173,12 @@ npm i --save-dev gulp-esm-to-cjs
 
 ``` js
 // gulpfile.js
-const esm-to-cjs = require("gulp-esm-to-cjs");
+const esmToCjs = require("gulp-esm-to-cjs");
 
 function convert() {
   return gulp
     .src(src)
-    .pipe(esm-to-cjs(options))
+    .pipe(esmToCjs(options))
     .pipe(gulp.dest(dest));
 }
 module.exports.convert = convert;
