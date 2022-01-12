@@ -266,11 +266,11 @@ const { a, b: c, d } = require("bar");
 {"title": "multiple imports" }
 ```
 ``` javascript
-import { a, b as c, d } from "foo";
+import { a, b as c, d, eas } from "foo";
 import { e, f, g } from "bar";
 ```
 ``` javascript
-const { a, b: c, d } = require("foo");
+const { a, b: c, d, eas } = require("foo");
 const { e, f, g } = require("bar");
 ```
 ---
