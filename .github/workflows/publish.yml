@@ -1,0 +1,21 @@
+name: npm publish
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish-npm:
+    name: Build and Publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          registry-url: "https://registry.npmjs.org"
+      - run: npm i
+      - run: npm run publish:core
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm run publish:gulp
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
