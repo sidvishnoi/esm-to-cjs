@@ -1,6 +1,6 @@
 {
   "name": "esm-to-cjs",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Transform ESM to Common JS for present NodeJS, without any junk wrappers or useless renaming",
   "keywords": [
     "commonjs",
