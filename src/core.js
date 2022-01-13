@@ -352,7 +352,7 @@ function* tokenize(str, options) {
       .split(/,\s*/)
       .map(i => i.trim())
       .filter(i => i)
-      .map(i => i.split(/\s*as\s*/));
+      .map(i => i.split(/\s*\bas\b\s*/));
   }
 }
 
