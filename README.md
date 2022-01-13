@@ -88,7 +88,7 @@ exports.baz = lorem1.baz;
 ```
 
 
-So, I created this tool using some simple string manipulations. A lot of sample input/output are [available here](https://github.com/sidvishnoi/esm-to-cjs/blob/master/test/fixtures/supported.md).
+So, I created this tool using some simple string manipulations. A lot of sample input/output are [available here](https://github.com/sidvishnoi/esm-to-cjs/blob/main/test/fixtures/supported.md).
 
 
 
